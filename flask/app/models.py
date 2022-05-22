@@ -3,31 +3,24 @@ from .enums import *
 from app import db
 
 
+lista_candidato = db.Table('ListaCandidato',
+    db.Column('id', db.Integer, primary_key=True),
+    db.Column('lista_id', db.Integer, db.ForeignKey('lista.id')),
+    db.Column('candidato_id', db.Integer, db.ForeignKey('candidato.id')),
+    db.Column('rol', db.Enum(Roles), default=Roles.otros, nullable=False))
+
+
 class Persona(db.Model):
     __tablename__ = "persona"
-    __table_args__ = (
-        db.UniqueConstraint("id_user"),
-    )
 
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String)
-    documento_id = db.Column(db.Integer, db.ForeignKey('documento.id'), unique=True, nullable=False)
-    id_user = db.Column(db.Integer, db.ForeignKey('usuario.id'), unique=True)
+    nombre = db.Column(db.String, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), unique=True)
+    cedula_identidad = db.Column(db.Integer, unique=True)
+    credencial = db.Column(db.String, unique=True)
     fecha_nacimiento = db.Column(db.Date)
     direccion = db.Column(db.String)
 
-
-class Documento(db.Model):
-    __tablename__ = "documento"
-    __table_args__ = (
-        db.UniqueConstraint("persona_id", "cedula"),
-        db.UniqueConstraint("persona_id", "credencial"),
-    )
-
-    id = db.Column(db.Integer, primary_key=True)
-    persona_id = db.Column(db.Integer, db.ForeignKey('persona.id'), nullable=False, unique=True)
-    cedula = db.Column(db.Integer, nullable=False)
-    credencial = db.Column(db.String, nullable=False)
 
 
 class Usuario(db.Model):
@@ -36,6 +29,7 @@ class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user = db.Column(db.String, nullable=False)
     persona_id = db.Column(db.Integer, db.ForeignKey('persona.id'), nullable=False, unique=True)
+
 
 
 class Candidato(db.Model):
@@ -47,45 +41,28 @@ class Candidato(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     persona_id = db.Column(db.Integer, db.ForeignKey('persona.id'), nullable=False, unique=True)
     partido_id = db.Column(db.Integer, db.ForeignKey('partido.id'), nullable=False)
+    listas_objs = db.relationship('Lista', secondary=lista_candidato, backref='candidato')
     
 
 
 class Partido(db.Model):
     __tablename__ = "partido"
-    __table_args__ = (
-        db.UniqueConstraint("persona_id", "cedula"),
-        db.UniqueConstraint("persona_id", "credencial"),
-    )
 
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String, nullable=False, unique=True)
     
 
 
-
 class Lista(db.Model):
     __tablename__ = "lista"
-    __table_args__ = (
-
-    )
-    id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String, nullable=False)
-    partido_id = db.Column(db.Integer, db.ForeignKey('partido.id'), nullable=False)
-    eleccion_id = db.Column(db.Integer, db.ForeignKey('eleccion'), nullable=False)
-
-
-
-class ListaCandidato(db.Model):
-    __tablename__ : "lista_candidato_rel
-    __table_args__ = (
-        db.UniqueConstraint("lista_id", "candidato_id"),
-    )
-    id = db.Column(db.Integer, primary_key=True)
-    lista_id = db.Column(db.Integer, db.ForeignKey('lista.id'), nullable=False) 
-    candidato_id = db.Column(db.Integer, db.ForeignKey('candidato.id'), nullable=False)
-    rol = db.Column(db.Enum(Roles), default=Roles.otros, nullable=False)
    
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String, nullable=False, unique=True)
+    partido_id = db.Column(db.Integer, db.ForeignKey('partido.id'), nullable=False)
+    eleccion_id = db.Column(db.Integer, db.ForeignKey('eleccion.id'), nullable=False)
+    candidatos_objs = db.relationship('Candidato', secondary=lista_candidato, backref='lista')
 
+   
 
 class Eleccion(db.Model):
     __tablename__ = "eleccion"
@@ -94,6 +71,6 @@ class Eleccion(db.Model):
     )
 
     id = db.Column(db.Integer, primary_key=True)
-    ano_electoral = db.Column(db.Integer, nullable=False)
+    anio_electoral = db.Column(db.DateTime, nullable=False)
 
 

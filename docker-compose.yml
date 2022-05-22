@@ -5,8 +5,10 @@ services:
     build: ./flask
     container_name: flask
     restart: always
+    volumes:
+      - ./flask/app:/home/app
     environment:
-      - FLASK_APP=app:create_app()
+      - FLASK_APP=app:create_app()['app']
     expose:
       - 8080
 
