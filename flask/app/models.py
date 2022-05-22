@@ -72,6 +72,7 @@ class Lista(db.Model):
     nombre = db.Column(db.String, nullable=False)
     partido_id = db.Column(db.Integer, db.ForeignKey('partido.id'), nullable=False)
     #persona_id = db.Column(db.Integer, db.ForeignKey('persona.id'), nullable=False, unique=True)
+    
 
 class ListaCandidato(db.Model):
     __tablename__ : "lista_candidato_rel
