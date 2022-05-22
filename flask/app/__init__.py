@@ -12,6 +12,6 @@ api = Api(app)
 
 @app.route('/')
 def home():
-    return "Esta es la pagina del home. Luego pongo un index.html (?"
+    return "Esta es la pagina del home. "
 
 from app.logic import *
