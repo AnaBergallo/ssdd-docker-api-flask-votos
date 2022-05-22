@@ -59,7 +59,7 @@ class Partido(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String, nullable=False, unique=True)
-    # persona_id = db.Column(db.Integer, db.ForeignKey('persona.id'), nullable=False, unique=True)
+    
 
 
 
@@ -71,8 +71,9 @@ class Lista(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String, nullable=False)
     partido_id = db.Column(db.Integer, db.ForeignKey('partido.id'), nullable=False)
-    #persona_id = db.Column(db.Integer, db.ForeignKey('persona.id'), nullable=False, unique=True)
-    
+    eleccion_id = db.Column(db.Integer, db.ForeignKey('eleccion'), nullable=False)
+
+
 
 class ListaCandidato(db.Model):
     __tablename__ : "lista_candidato_rel
@@ -83,8 +84,7 @@ class ListaCandidato(db.Model):
     lista_id = db.Column(db.Integer, db.ForeignKey('lista.id'), nullable=False) 
     candidato_id = db.Column(db.Integer, db.ForeignKey('candidato.id'), nullable=False)
     rol = db.Column(db.Enum(Roles), default=Roles.otros, nullable=False)
-    eleccion_id = db.Column(db.Integer, db.ForeignKey('eleccion'), nullable=False)
-
+   
 
 
 class Eleccion(db.Model):
@@ -97,15 +97,3 @@ class Eleccion(db.Model):
     ano_electoral = db.Column(db.Integer, nullable=False)
 
 
-class Padron(db.Model):
-    __tablename__ = "padron"
-    __table_args__ = (
-
-    )
-
-
-class Circuito(db.Model):
-    __tablename__ = "circuito"
-    __table_args__ = (
-
-    )
