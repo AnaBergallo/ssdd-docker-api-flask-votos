@@ -1,8 +1,12 @@
 import json
-from flask_restful import Resource
+import requests
+from flask import request, jsonify
+from flask_restful import Resource, reqparse
 from . import app, api
 from .models import Lista as lista_model, Persona as presona_model, Partido as partido_model, Candidato as candidato_model
 
+parser = reqparse.RequestParser()
+parser.add_argument("token", type=json)
 
 
 class Partidos(Resource):
@@ -15,8 +19,6 @@ class Partidos(Resource):
 
         partidos_json = json.dumps(partidos_dict)
         return partidos_dict, 200
-        
-
 
 class Candidatos(Resource):
    def get(self):
@@ -28,39 +30,51 @@ class Candidatos(Resource):
         candidatos_json = json.dumps(candidatos_dict)
         return candidatos_json, 200
         
-
-
 class Listas(Resource):
     def get(self):
-      listas = lista_model.query.order_by(lista_model.nombre).all()
-      listas_dict = {}
-      for lista in listas: 
-        listas_dict[lista.id] = {'nombre':lista.nombre, 'candidatos': lista.candidatos_objs}
+        listas = lista_model.query.order_by(lista_model.nombre).all()
+        listas_dict = {}
+        for lista in listas: 
+          listas_dict[lista.id] = {'nombre':lista.nombre, 'candidatos': lista.candidatos_objs}
 
-      listas_json = json.dumps(listas_dict)
-      return listas_json, 200
+        listas_json = json.dumps(listas_dict)
+        return  listas_json, 200
 
+class Personas(Resource):
+    def get(self):
+        personas = presona_model.query.order_by(presona_model.id).all()
+        personas_dict = {}
+        for persona in personas: 
+            personas_dict[persona.id] = {'nombre': persona.nombre, 'cedula_identidad': persona.cedula_identidad}
+         
+        return personas_dict, 200
 
 
 class Lista(Resource):
     def get(self, lista_id:int):
         lista = lista_model.query.filter_by(id=lista_id).first_or_404()
-        lista = {
-          'nombre': lista.nombre,
-          'lista_id': lista.lista_id,
-        }
-        lista_json = json.dumps(lista)
-        return lista_json, 200
-
-
+        if lista: 
+            lista = {
+              'nombre': lista.nombre,
+              'lista_id': lista.lista_id,
+            }
+            lista_json = json.dumps(lista)
+            return lista_json, 200
+        else: 
+            error = json.dumps({"message":"Error"})
+            return error, 404
 
 class Persona(Resource):
     def get(self, persona_id: int):
         persona = presona_model.query.filter_by(id=persona_id).first_or_404()
-        persona = {
-          'nombre': persona.nombre,
-        }
-        return persona, 200
+        if persona: 
+            persona = {
+                'nombre': persona.nombre,
+              }
+            return persona, 200
+        else: 
+            error = json.dumps({"message":"Error"})
+            return error, 404
 
 class Partido(Resource):
     def get(self, partido_id: int):
@@ -71,12 +85,67 @@ class Partido(Resource):
         }
         return partido, 200
 
+class Candidato(Resource):
+    def get(self, candidato_id: int):
+        candidato = candidato_model.query.filter_by(id=candidato_id).first_or_404()
+        candidato = {
+          'nombre': candidato.nombre,
+        }
+        return candidato, 200
+
+
+class Votar(Resource):
+    def validateToken(self, token):
+          data={"token":token}
+          data= json.dumps(data)
+          url = "https://accountmanagerucuback.azurewebsites.net/validateToken"
+          response = requests.get(url=url,data=data, headers={"Content-Type": "application/json"})
+          print(response.text)
+          if response.status_code == 200:
+              return True
+          return False
+
+    def post(self):
+        # content_type = requests.headers.get('Content-Type')
+        # if (content_type == 'application/json'):
+        
+        data =  request.get_json()
+        lista_id2 = data["lista_id"]
+        token = data["token"]
+        valido =  self.validateToken(token)
+        print(valido)
+        voto = {  "list_id": lista_id2,
+                  "election_id": "SJDFK324342",
+                  "circuit_id": "AHA2019",
+                  "user_credential": "BVB2157"
+                }
+        url = "https://us-central1-sufragiapp.cloudfunctions.net/sufragiapp_bc/addVote"
+
+        response = requests.post(url=url,data=voto)
+        
+        return response.json()
+      
+class initSession(Resource):
+    def post(self):
+      data =  request.get_json()
+      # TODO LLAMAR AL FRONT PARA QUE INICIE
+      return  "OKanita, data enviada: "+str(data), 200
+
+
 
 api.add_resource(Listas, '/listas')
 api.add_resource(Candidatos, '/candidatos')
 api.add_resource(Partidos, '/partidos')
+api.add_resource(Personas, '/personas')
+
 api.add_resource(Lista, '/lista/<lista_id>')
 api.add_resource(Persona, '/persona/<persona_id>')
 api.add_resource(Partido, '/partido/<partido_id>')
+api.add_resource(Candidato, '/candidato/<candidato_id>')
+
+api.add_resource(Votar, '/votar')
+
+api.add_resource(initSession, '/session')
+
 
 

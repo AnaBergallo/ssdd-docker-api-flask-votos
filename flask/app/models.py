@@ -73,4 +73,3 @@ class Eleccion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     anio_electoral = db.Column(db.DateTime, nullable=False)
 
-

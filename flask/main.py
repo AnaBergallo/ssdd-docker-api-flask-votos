@@ -1,4 +1,4 @@
-from app import app, api
+from app import app, api, db
 
 
 if __name__ == '__main__':
