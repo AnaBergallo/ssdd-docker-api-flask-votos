@@ -25,20 +25,22 @@ class Candidatos(Resource):
         candidatos = candidato_model.query.order_by(candidato_model.id).all()
         candidatos_dict = {}
         for candidato in candidatos: 
-          candidatos_dict[candidato.id] = {'id': candidato.id, 'nombre':candidato.persona_id.nombre}
+          nombre = ''
+          if candidato.persona_id: 
+              persona = presona_model.query.filter_by(id=candidato.persona_id).first_or_404()
+              nombre = persona.nombre
+          candidatos_dict[candidato.id] = {'id': candidato.id, 'nombre':nombre}
 
-        candidatos_json = json.dumps(candidatos_dict)
-        return candidatos_json, 200
+        return candidatos_dict, 200
         
 class Listas(Resource):
     def get(self):
         listas = lista_model.query.order_by(lista_model.nombre).all()
         listas_dict = {}
         for lista in listas: 
-          listas_dict[lista.id] = {'nombre':lista.nombre, 'candidatos': lista.candidatos_objs}
+          listas_dict[lista.id] = {'nombre':lista.nombre}
 
-        listas_json = json.dumps(listas_dict)
-        return  listas_json, 200
+        return  listas_dict, 200
 
 class Personas(Resource):
     def get(self):
@@ -51,15 +53,15 @@ class Personas(Resource):
 
 
 class Lista(Resource):
-    def get(self, lista_id:int):
+    def get(self, lista_id):
         lista = lista_model.query.filter_by(id=lista_id).first_or_404()
         if lista: 
             lista = {
               'nombre': lista.nombre,
-              'lista_id': lista.lista_id,
+              'lista_id': lista.id,
             }
-            lista_json = json.dumps(lista)
-            return lista_json, 200
+            
+            return lista, 200
         else: 
             error = json.dumps({"message":"Error"})
             return error, 404
@@ -86,12 +88,21 @@ class Partido(Resource):
         return partido, 200
 
 class Candidato(Resource):
-    def get(self, candidato_id: int):
+    def get(self, candidato_id):
         candidato = candidato_model.query.filter_by(id=candidato_id).first_or_404()
-        candidato = {
-          'nombre': candidato.nombre,
-        }
-        return candidato, 200
+        nombreCandidato = ''
+        nombrePartido = ''
+
+        if candidato.persona_id: 
+            persona = presona_model.query.filter_by(id=candidato.persona_id).first_or_404()
+            nombreCandidato = persona.nombre
+        if candidato.partido_id: 
+            partido = partido_model.query.filter_by(id=candidato.partido_id).first_or_404()
+            nombrePartido = partido.nombre
+        candidato_dict = {}
+        candidato_dict[candidato.id] = {'nombre':nombreCandidato, 'partido': nombrePartido}
+        
+        return candidato_dict, 200
 
 
 class Votar(Resource):
