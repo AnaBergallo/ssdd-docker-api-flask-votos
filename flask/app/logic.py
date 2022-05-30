@@ -111,7 +111,6 @@ class Votar(Resource):
           data= json.dumps(data)
           url = "https://accountmanagerucuback.azurewebsites.net/validateToken"
           response = requests.get(url=url,data=data, headers={"Content-Type": "application/json"})
-          print(response.text)
           if response.status_code == 200:
               return True
           return False
@@ -124,17 +123,19 @@ class Votar(Resource):
         lista_id2 = data["lista_id"]
         token = data["token"]
         valido =  self.validateToken(token)
-        print(valido)
-        voto = {  "list_id": lista_id2,
-                  "election_id": "SJDFK324342",
-                  "circuit_id": "AHA2019",
-                  "user_credential": "BVB2157"
-                }
-        url = "https://us-central1-sufragiapp.cloudfunctions.net/sufragiapp_bc/addVote"
+        if valido:
+            voto = {  "list_id": lista_id2,
+                      "election_id": "SJDFK324342",
+                      "circuit_id": "AHA2019",
+                      "user_credential": "jkasjdk"
+                    }
+            url = "https://us-central1-sufragiapp.cloudfunctions.net/sufragiapp_bc/addVote"
 
-        response = requests.post(url=url,data=voto)
-        
-        return response.json()
+            response = requests.post(url=url,data=voto)
+            print("\n\nResponse :",response)
+            return response.json(), 200
+        else:
+            return "Error", 400
       
 class initSession(Resource):
     def post(self):
