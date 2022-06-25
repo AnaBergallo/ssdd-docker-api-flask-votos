@@ -137,11 +137,7 @@ class Votar(Resource):
         else:
             return "Error", 400
       
-class initSession(Resource):
-    def post(self):
-      data =  request.get_json()
-      # TODO LLAMAR AL FRONT PARA QUE INICIE
-      return  "OKanita, data enviada: "+str(data), 200
+
 
 
 

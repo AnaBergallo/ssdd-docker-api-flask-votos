@@ -4,10 +4,11 @@ COPY main.py /home/
 
 COPY app.ini /home/
 
-RUN apk add python3-dev build-base linux-headers pcre-dev uwsgi build-base postgresql-dev libpq
+RUN apk add python3-dev build-base linux-headers pcre-dev uwsgi postgresql-dev libpq
 
-RUN pip3 install uwsgi flask flask_restful Flask-SQLAlchemy psycopg2-binary flask_migrate requests
+RUN pip3 install uwsgi flask flask_restful Flask-SQLAlchemy psycopg2-binary requests
 
+RUN pip install flask-migrate
 
 WORKDIR  /home
 
